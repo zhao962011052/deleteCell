@@ -12,7 +12,7 @@ import UIKit
 
 class SGFavoritesCell: UITableViewCell {
 
-    let kMiddle : CGFloat = 150
+    let kMiddle : CGFloat = 250
     
     var titleLabel : UILabel?
     var urlLabel   : UILabel?
@@ -171,15 +171,23 @@ extension SGFavoritesCell{
         case .began:
             fallthrough
         case .changed:
-            print("\((showView?.frame.origin.x)! + translation.x)")
             
-//            //右滑禁用
-//            if showView?.frame.origin.x)! + translation.x > 0 {
-//                
-//            }
+            //右滑禁用
+            if (showView?.frame.origin.x)! + translation.x > 0 {
+                return
+            }
        
+            //左滑禁止
+            if (showView?.frame.origin.x)! + translation.x < -kMiddle {
+                return
+            }
+            
+            //改变root的transform
+            self.showView?.transform = (self.showView?.transform)!.translatedBy(x: translation.x, y: 0)
+            
+            printLog(message: "\((showView?.frame.origin.x)! + translation.x)")
         default:
-            print("默认")
+            printLog(message: "默认")
         }
     }
     
@@ -198,7 +206,7 @@ extension SGFavoritesCell{
             let newPoint = change![NSKeyValueChangeKey.newKey] as! CGPoint
             
             if oldPoint.y != newPoint.y {
-//                print("sueperTabelViewMoves")
+//                printLog(message:"sueperTabelViewMoves")
                 
             }
             
@@ -209,7 +217,7 @@ extension SGFavoritesCell{
         NotificationCenter.default.addObserver(self, selector: #selector(handleNotify(_:)), name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil)
     }
     @objc private func handleNotify(_ n:NSNotification){
-        print("收到通知啦")
+        printLog(message:"收到通知啦")
     }
 
 
