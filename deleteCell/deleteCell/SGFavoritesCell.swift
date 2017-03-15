@@ -166,30 +166,67 @@ extension SGFavoritesCell{
     
     @objc private func pan(ges: UIPanGestureRecognizer){
         //获取偏移量
-        let translation = ges.translation(in: self)
+        let translation = ges.translation(in: self.showView)
+//        let location = ges.location(in: self.contentView)
         switch ges.state {
         case .began:
             fallthrough
         case .changed:
+            printLog(message: "\(fabs(translation.x)) ------\(fabs(translation.y))")
+            
+            if fabs(translation.x)<=fabs(translation.y) {
+                superTableView?.isScrollEnabled = true
+            }else{
+                superTableView?.isScrollEnabled = false
+            }
             
             //右滑禁用
             if (showView?.frame.origin.x)! + translation.x > 0 {
                 return
             }
-       
+            
             //左滑禁止
             if (showView?.frame.origin.x)! + translation.x < -kMiddle {
                 return
             }
-            
             //改变root的transform
             self.showView?.transform = (self.showView?.transform)!.translatedBy(x: translation.x, y: 0)
             
-            printLog(message: "\((showView?.frame.origin.x)! + translation.x)")
+            //恢复到初始状态
+            ges.setTranslation(CGPoint(x: 0, y: 0), in: self.showView)
+         
+        case .ended: fallthrough
+        case .cancelled: fallthrough
+        case .failed:
+            if (self.showView?.frame.origin.x)! < -kMiddle/2 { //滑到左侧
+                open()
+                superTableView?.isScrollEnabled = false
+            }else{//滑到右侧
+                close()
+                superTableView?.isScrollEnabled = true
+            }
+            
         default:
             printLog(message: "默认")
         }
     }
+    
+    //打开
+    private func open(){
+        UIView.animate(withDuration: 0.2) {
+            self.showView?.transform = CGAffineTransform(translationX:-self.kMiddle, y: 0)
+        }
+    }
+    //关闭
+    private func close(){
+        UIView.animate(withDuration: 0.2) {
+            self.showView?.transform = CGAffineTransform.identity
+        }
+    }
+
+    
+    
+    
     
 }
 // MARK: - 观察者&通知
