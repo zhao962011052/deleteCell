@@ -8,7 +8,11 @@
 
 import UIKit
 
-
+enum notifyStyle {
+    case closeCell
+    case otherCellIsOpen
+    case otherCellIsClose
+}
 
 class SGFavoritesCell: UITableViewCell {
 
@@ -23,6 +27,7 @@ class SGFavoritesCell: UITableViewCell {
     var isShowing: Bool?
     let rightfinalWidth:CGFloat = 300
     var otherCellIsOpen :Bool = false
+    var selfCellIsOpen :Bool = false
     
     
     
@@ -148,7 +153,7 @@ extension SGFavoritesCell{
 extension SGFavoritesCell{
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"closeCell"])
+        self.sendNotify(.closeCell)
     }
     
     fileprivate func addGesture(){
@@ -182,6 +187,7 @@ extension SGFavoritesCell{
                 superTableView?.isScrollEnabled = false
             }
             if otherCellIsOpen {
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"closeCell"])
                 return
             }
             
@@ -247,30 +253,20 @@ extension SGFavoritesCell{
     }
     @objc private func handleNotify(_ notify:NSNotification){
         printLog(message:"收到通知啦")
-        
-        /*
-         if ([[notify.userInfo objectForKey:@"action"] isEqualToString:@"closeCell"]) {
-         [self hideBtn];
-         _otherCellIsOpen = NO;
-         }
-         else if ([[notify.userInfo objectForKey:@"action"] isEqualToString:@"otherCellIsOpen"]){
-         _otherCellIsOpen = YES;
-         }
-         else if ([[notify.userInfo objectForKey:@"action"] isEqualToString:@"otherCellIsClose"])
-         {
-         _otherCellIsOpen = NO;
-         }
-         */
+
         var dict = notify.userInfo
         if (dict?["action"] as! NSString).isEqual(to: "closeCell")  {
             close()
             otherCellIsOpen = false
+            printLog(message:"closeCell")
         }
         else if (dict?["action"] as! NSString).isEqual(to: "otherCellIsOpen")  {
             otherCellIsOpen = true
+            printLog(message:"otherCellIsOpen")
         }
         else if (dict?["action"] as! NSString).isEqual(to: "otherCellIsClose")  {
             otherCellIsOpen = false
+            printLog(message:"otherCellIsClose")
         }
 
         
@@ -288,9 +284,10 @@ extension SGFavoritesCell{
         
         UIView.animate(withDuration: 0.2, animations: {
             self.showView?.transform = CGAffineTransform(translationX:-self.kMiddle, y: 0)
+            
         }) { (_) in
             
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"otherCellIsOpen"])
+            self.sendNotify(.otherCellIsOpen)
             self.superTableView?.isScrollEnabled = true
         }
     }
@@ -300,10 +297,28 @@ extension SGFavoritesCell{
         UIView.animate(withDuration: 0.2, animations: {
             self.showView?.transform = CGAffineTransform.identity
         }) { (_) in
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"otherCellIsClose"])
+           self.sendNotify(.otherCellIsClose)
             self.superTableView?.isScrollEnabled = true
         }
     }
+    //通知
+    fileprivate func sendNotify(_ notifyStyle:notifyStyle){
+
+        switch notifyStyle {
+        case .closeCell:
+             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"closeCell"])
+        case .otherCellIsOpen:
+             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"otherCellIsOpen"])
+        case .otherCellIsClose:
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"otherCellIsClose"])
+        }
+        
+    }
+
+    
+    
+    
     
 }
+
 
