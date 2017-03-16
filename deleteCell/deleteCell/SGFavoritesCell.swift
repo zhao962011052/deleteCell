@@ -214,33 +214,11 @@ extension SGFavoritesCell{
         }
     }
     
-    //打开
-    fileprivate func open(){
-        
-        UIView.animate(withDuration: 0.2, animations: { 
-            self.showView?.transform = CGAffineTransform(translationX:-self.kMiddle, y: 0)
-        }) { (_) in
-            
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"otherCellIsOpen"])
-            self.superTableView?.isScrollEnabled = true
-        }
-    }
-    //关闭
-    fileprivate func close(){
-
-        UIView.animate(withDuration: 0.2, animations: { 
-          self.showView?.transform = CGAffineTransform.identity
-        }) { (_) in
-          NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"otherCellIsClose"])
-          self.superTableView?.isScrollEnabled = true
-        }
-    }
-
-    
-    
-    
-    
 }
+
+
+
+
 // MARK: - 观察者&通知
 extension SGFavoritesCell{
     
@@ -299,7 +277,33 @@ extension SGFavoritesCell{
     }
 
 
-    
-
-
 }
+
+
+
+// MARK: - 方法
+extension SGFavoritesCell{
+    //打开
+    fileprivate func open(){
+        
+        UIView.animate(withDuration: 0.2, animations: {
+            self.showView?.transform = CGAffineTransform(translationX:-self.kMiddle, y: 0)
+        }) { (_) in
+            
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"otherCellIsOpen"])
+            self.superTableView?.isScrollEnabled = true
+        }
+    }
+    //关闭
+    fileprivate func close(){
+        
+        UIView.animate(withDuration: 0.2, animations: {
+            self.showView?.transform = CGAffineTransform.identity
+        }) { (_) in
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"otherCellIsClose"])
+            self.superTableView?.isScrollEnabled = true
+        }
+    }
+    
+}
+
