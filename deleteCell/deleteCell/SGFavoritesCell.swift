@@ -167,15 +167,16 @@ extension SGFavoritesCell{
     @objc private func pan(ges: UIPanGestureRecognizer){
         //获取偏移量
         let translation = ges.translation(in: self.showView)
-//        let location = ges.location(in: self.contentView)
+        let location = ges.translation(in: self.contentView)
         switch ges.state {
         case .began:
             fallthrough
         case .changed:
             printLog(message: "\(fabs(translation.x)) ------\(fabs(translation.y))")
             
-            if fabs(translation.x)<=fabs(translation.y) {
+            if fabs(location.x)<=fabs(location.y) {
                 superTableView?.isScrollEnabled = true
+                return
             }else{
                 superTableView?.isScrollEnabled = false
             }
@@ -200,10 +201,8 @@ extension SGFavoritesCell{
         case .failed:
             if (self.showView?.frame.origin.x)! < -kMiddle/2 { //滑到左侧
                 open()
-                superTableView?.isScrollEnabled = false
             }else{//滑到右侧
                 close()
-                superTableView?.isScrollEnabled = true
             }
             
         default:
@@ -212,15 +211,21 @@ extension SGFavoritesCell{
     }
     
     //打开
-    private func open(){
-        UIView.animate(withDuration: 0.2) {
+    fileprivate func open(){
+        
+        UIView.animate(withDuration: 0.2, animations: { 
             self.showView?.transform = CGAffineTransform(translationX:-self.kMiddle, y: 0)
+        }) { (_) in
+            self.superTableView?.isScrollEnabled = true
         }
     }
     //关闭
-    private func close(){
-        UIView.animate(withDuration: 0.2) {
-            self.showView?.transform = CGAffineTransform.identity
+    fileprivate func close(){
+
+        UIView.animate(withDuration: 0.2, animations: { 
+          self.showView?.transform = CGAffineTransform.identity
+        }) { (_) in
+          self.superTableView?.isScrollEnabled = true
         }
     }
 
@@ -243,8 +248,10 @@ extension SGFavoritesCell{
             let newPoint = change![NSKeyValueChangeKey.newKey] as! CGPoint
             
             if oldPoint.y != newPoint.y {
-//                printLog(message:"sueperTabelViewMoves")
                 
+                if self.showView?.frame.origin.x == -self.kMiddle{
+                    close()
+                }
             }
             
         }
