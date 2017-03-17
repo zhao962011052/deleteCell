@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E6FE17B51E7BC68C006705EE /* deleteCellHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6FE17B41E7BC68C006705EE /* deleteCellHelper.swift */; };
 		E6FFF44B1E78DD6600CFE4A2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6FFF44A1E78DD6600CFE4A2 /* AppDelegate.swift */; };
 		E6FFF4501E78DD6600CFE4A2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E6FFF44E1E78DD6600CFE4A2 /* Main.storyboard */; };
 		E6FFF4521E78DD6600CFE4A2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E6FFF4511E78DD6600CFE4A2 /* Assets.xcassets */; };
@@ -29,6 +30,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E6FE17B41E7BC68C006705EE /* deleteCellHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = deleteCellHelper.swift; sourceTree = "<group>"; };
 		E6FFF4471E78DD6600CFE4A2 /* deleteCell.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = deleteCell.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6FFF44A1E78DD6600CFE4A2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E6FFF44F1E78DD6600CFE4A2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 				E6FFF44A1E78DD6600CFE4A2 /* AppDelegate.swift */,
 				E6FFF47A1E78E03000CFE4A2 /* SGFavoritesController.swift */,
 				E6FFF4781E78DF8F00CFE4A2 /* SGFavoritesCell.swift */,
+				E6FE17B41E7BC68C006705EE /* deleteCellHelper.swift */,
 				E6FFF47C1E78E1A900CFE4A2 /* SGFunc.swift */,
 				E6FFF44E1E78DD6600CFE4A2 /* Main.storyboard */,
 				E6FFF4511E78DD6600CFE4A2 /* Assets.xcassets */,
@@ -194,6 +197,7 @@
 				E6FFF4721E78DEC700CFE4A2 /* Debugging.swift in Sources */,
 				E6FFF4731E78DEC700CFE4A2 /* EdgeInsets.swift in Sources */,
 				E6FFF4761E78DEC700CFE4A2 /* View+SnapKit.swift in Sources */,
+				E6FE17B51E7BC68C006705EE /* deleteCellHelper.swift in Sources */,
 				E6FFF46C1E78DEC700CFE4A2 /* Constraint.swift in Sources */,
 				E6FFF44B1E78DD6600CFE4A2 /* AppDelegate.swift in Sources */,
 				E6FFF46D1E78DEC700CFE4A2 /* ConstraintAttributes.swift in Sources */,

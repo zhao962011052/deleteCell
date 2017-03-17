@@ -29,13 +29,18 @@ class SGFavoritesCell: UITableViewCell {
     var otherCellIsOpen :Bool = false
     var selfCellIsOpen :Bool = false
     
+    var cellHelper: deleteCellHelper?
+    
+    
     
     
     
     
     init(style: UITableViewCellStyle, reuseIdentifier: String?,tableView:UITableView) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-       
+        
+        cellHelper = deleteCellHelper.sharedHelper(cell: self, currentTableView: tableView)
+        
         superTableView = tableView
         setupUI()
         addObserverEvent()
@@ -280,7 +285,7 @@ extension SGFavoritesCell{
 // MARK: - 方法
 extension SGFavoritesCell{
     //打开
-    fileprivate func open(){
+     func open(){
         
         UIView.animate(withDuration: 0.2, animations: {
             self.showView?.transform = CGAffineTransform(translationX:-self.kMiddle, y: 0)
@@ -292,7 +297,7 @@ extension SGFavoritesCell{
         }
     }
     //关闭
-    fileprivate func close(){
+     func close(){
         
         UIView.animate(withDuration: 0.2, animations: {
             self.showView?.transform = CGAffineTransform.identity
