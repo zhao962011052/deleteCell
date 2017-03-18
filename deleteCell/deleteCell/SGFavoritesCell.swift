@@ -22,30 +22,15 @@ class SGFavoritesCell: UITableViewCell {
     var urlLabel   : UILabel?
     var iconView   : UIImageView?
     var showView   : UIView?
-    var superTableView : UITableView?
-    var isHiding : Bool?
-    var isShowing: Bool?
-    let rightfinalWidth:CGFloat = 300
-    var otherCellIsOpen :Bool = false
-    var selfCellIsOpen :Bool = false
     
     var cellHelper: deleteCellHelper?
-    
-    
-    
-    
-    
     
     init(style: UITableViewCellStyle, reuseIdentifier: String?,tableView:UITableView) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         cellHelper = deleteCellHelper.sharedHelper(cell: self, currentTableView: tableView)
         
-        superTableView = tableView
         setupUI()
-        addObserverEvent()
-        addGesture()
-        addNotify()
         
     }
     
@@ -152,178 +137,6 @@ extension SGFavoritesCell{
 
         return showView
     }
-}
-
-// MARK: - 手势交互
-extension SGFavoritesCell{
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.sendNotify(.closeCell)
-    }
-    
-    fileprivate func addGesture(){
-        let gesPan = UIPanGestureRecognizer(target: self, action: #selector(pan(ges:)))
-        gesPan.delegate = self
-        contentView.addGestureRecognizer(gesPan)
-        
-    }
-    
-    //解决手势冲突问题
-    override func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true;
-
-    }
-
-    
-    @objc private func pan(ges: UIPanGestureRecognizer){
-        //获取偏移量
-        let translation = ges.translation(in: self.showView)
-        let location = ges.translation(in: self.contentView)
-        switch ges.state {
-        case .began:
-            fallthrough
-        case .changed:
-            printLog(message: "\(fabs(translation.x)) ------\(fabs(translation.y))")
-            
-            if fabs(location.x)<=fabs(location.y) {
-                superTableView?.isScrollEnabled = true
-                return
-            }else {
-                superTableView?.isScrollEnabled = false
-            }
-            if otherCellIsOpen {
-                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"closeCell"])
-                return
-            }
-            
-            //右滑禁用
-            if (showView?.frame.origin.x)! + translation.x > 0 {
-                return
-            }
-            
-            //左滑禁止
-            if (showView?.frame.origin.x)! + translation.x < -kMiddle {
-                return
-            }
-            //改变root的transform
-            self.showView?.transform = (self.showView?.transform)!.translatedBy(x: translation.x, y: 0)
-            
-            //恢复到初始状态
-            ges.setTranslation(CGPoint(x: 0, y: 0), in: self.showView)
-         
-        case .ended: fallthrough
-        case .cancelled: fallthrough
-        case .failed:
-            if (self.showView?.frame.origin.x)! < -kMiddle/2 { //滑到左侧
-                open()
-            }else{//滑到右侧
-                close()
-            }
-            
-        default:
-            printLog(message: "默认")
-        }
-    }
-    
-}
-
-
-
-
-// MARK: - 观察者&通知
-extension SGFavoritesCell{
-    
-    fileprivate func addObserverEvent(){
-        
-        superTableView?.addObserver(self, forKeyPath: "contentOffset", options: [.new, .old], context: nil)
-        
-    }
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if (keyPath! as NSString).isEqual(to: "contentOffset") {
-            let oldPoint = change![NSKeyValueChangeKey.oldKey] as! CGPoint
-            let newPoint = change![NSKeyValueChangeKey.newKey] as! CGPoint
-            
-            if oldPoint.y != newPoint.y {
-                
-                if self.showView?.frame.origin.x == -self.kMiddle{
-                    close()
-                }
-            }
-            
-        }
-    }
-    
-    fileprivate func addNotify(){
-        NotificationCenter.default.addObserver(self, selector: #selector(handleNotify(_:)), name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil)
-    }
-    @objc private func handleNotify(_ notify:NSNotification){
-        printLog(message:"收到通知啦")
-
-        var dict = notify.userInfo
-        if (dict?["action"] as! NSString).isEqual(to: "closeCell")  {
-            close()
-            otherCellIsOpen = false
-            printLog(message:"closeCell")
-        }
-        else if (dict?["action"] as! NSString).isEqual(to: "otherCellIsOpen")  {
-            otherCellIsOpen = true
-            printLog(message:"otherCellIsOpen")
-        }
-        else if (dict?["action"] as! NSString).isEqual(to: "otherCellIsClose")  {
-            otherCellIsOpen = false
-            printLog(message:"otherCellIsClose")
-        }
-
-        
-    }
-
-
-}
-
-
-
-// MARK: - 方法
-extension SGFavoritesCell{
-    //打开
-     func open(){
-        
-        UIView.animate(withDuration: 0.2, animations: {
-            self.showView?.transform = CGAffineTransform(translationX:-self.kMiddle, y: 0)
-            
-        }) { (_) in
-            
-            self.sendNotify(.otherCellIsOpen)
-            self.superTableView?.isScrollEnabled = true
-        }
-    }
-    //关闭
-     func close(){
-        
-        UIView.animate(withDuration: 0.2, animations: {
-            self.showView?.transform = CGAffineTransform.identity
-        }) { (_) in
-           self.sendNotify(.otherCellIsClose)
-            self.superTableView?.isScrollEnabled = true
-        }
-    }
-    //通知
-    fileprivate func sendNotify(_ notifyStyle:notifyStyle){
-
-        switch notifyStyle {
-        case .closeCell:
-             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"closeCell"])
-        case .otherCellIsOpen:
-             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"otherCellIsOpen"])
-        case .otherCellIsClose:
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SC_CELL_SHOULDCLOSE"), object: nil, userInfo: ["action":"otherCellIsClose"])
-        }
-        
-    }
-
-    
-    
-    
-    
 }
 
 

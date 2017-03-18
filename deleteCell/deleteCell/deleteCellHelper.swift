@@ -43,10 +43,10 @@ class deleteCellHelper: NSObject {
 extension deleteCellHelper : UIGestureRecognizerDelegate{
     
     
-    fileprivate func addGesture(toCell cell : UITableViewCell){
+    fileprivate func addGesture(toCell cell : SGFavoritesCell){
         let gesPan = UIPanGestureRecognizer(target: self, action: #selector(pan(ges:)))
         gesPan.delegate = self
-        cell.contentView.addGestureRecognizer(gesPan)
+        cell.addGestureRecognizer(gesPan)
         
     }
     
@@ -59,7 +59,33 @@ extension deleteCellHelper : UIGestureRecognizerDelegate{
         case .began:
             fallthrough
         case .changed:
-            printLog(message: "\(fabs(translation.x)) ------\(fabs(translation.y))")
+//            printLog(message: "\(fabs(translation.x)) ------\(fabs(translation.y))")
+            
+            /*
+                1.门卫标准：openArray为空 或者 cell属于openArray
+                esle
+                    1.openAarray 中的cell关闭
+                    2.终止本次手势
+                    3.return
+            */
+            
+            guard self.cellArray.openArray.count == 0 || self.cellArray.openArray.contains(cell) else {
+                
+                for cell in self.cellArray.openArray {
+                    self.close(cell: cell)
+                }
+                
+                //延时1秒执行
+                ges.isEnabled = false
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1){
+                    ges.isEnabled = true
+                }
+                
+                return
+            }
+            
+            
+            
             
             if fabs(location.x)<=fabs(location.y) {
                 currentTableView?.isScrollEnabled = true
@@ -88,9 +114,9 @@ extension deleteCellHelper : UIGestureRecognizerDelegate{
         case .cancelled: fallthrough
         case .failed:
             if (cell.showView?.frame.origin.x)! < -kMiddle/2 { //滑到左侧
-               cell.open()
+               self.open(cell: cell)
             }else{//滑到右侧
-               cell.close()
+               self.close(cell: cell)
             }
             
         default:
@@ -98,7 +124,11 @@ extension deleteCellHelper : UIGestureRecognizerDelegate{
         }
     }
 
-    
+        //解决手势冲突问题
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+            return true;
+
+    }
 }
 
 
@@ -117,13 +147,54 @@ extension deleteCellHelper{
             
             if oldPoint.y != newPoint.y {
                 for cell in self.cellArray.openArray {
-                    cell.close()
+                    self.close(cell:cell)
                 }
             }
             
         }
     }
     
+    
+}
+
+
+// MARK: - 方法
+extension deleteCellHelper{
+    //打开
+    func open(cell:SGFavoritesCell){
+        
+        UIView.animate(withDuration: 0.2, animations: {
+            cell.showView?.transform = CGAffineTransform(translationX:-self.kMiddle, y: 0)
+            
+        }) { (_) in
+            self.currentTableView?.isScrollEnabled = true
+            
+            //closeArray 中删除 cell
+            let index = self.cellArray.closeArray.index(of: cell)
+            self.cellArray.closeArray.remove(at: index!)
+            //openArray  中添加 cell
+            self.cellArray.openArray.removeAll()
+            self.cellArray.openArray.append(cell)
+           
+        }
+    }
+    //关闭
+    func close(cell:SGFavoritesCell){
+        
+        UIView.animate(withDuration: 0.2, animations: {
+            cell.showView?.transform = CGAffineTransform.identity
+        }) { (_) in
+            self.currentTableView?.isScrollEnabled = true
+            
+            //openArray 中删除 cell
+            self.cellArray.openArray.removeAll()
+            //closeArray  中添加 cell
+            if !self.cellArray.closeArray.contains(cell){
+               self.cellArray.closeArray.append(cell)
+            }
+            
+        }
+    }
     
 }
 
