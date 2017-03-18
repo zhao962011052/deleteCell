@@ -97,7 +97,7 @@ extension deleteCellHelper : UIGestureRecognizerDelegate{
                         self.close(cell: cell)
                     }
                     
-                    //延时1秒执行
+                    //延时0.1秒执行
                     ges.isEnabled = false
                     DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1){
                         ges.isEnabled = true
@@ -105,7 +105,7 @@ extension deleteCellHelper : UIGestureRecognizerDelegate{
                     
                     return
                 }else{
-                    //延时1秒执行
+                    //延时0.1秒执行
                     ges.isEnabled = false
                     DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1){
                         ges.isEnabled = true
