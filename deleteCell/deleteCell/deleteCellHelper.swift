@@ -19,6 +19,7 @@ class deleteCellHelper: NSObject {
     let kMiddle : CGFloat = 250
     var currentTableView : UITableView?
     fileprivate lazy var cellArray = CellArray(openArray: [SGFavoritesCell](),closeArray: [SGFavoritesCell]())
+    var currentCell : SGFavoritesCell?
     
     
     private static let sharedInstance = deleteCellHelper()
@@ -44,9 +45,22 @@ extension deleteCellHelper : UIGestureRecognizerDelegate{
     
     
     fileprivate func addGesture(toCell cell : SGFavoritesCell){
+        //平移手势
         let gesPan = UIPanGestureRecognizer(target: self, action: #selector(pan(ges:)))
         gesPan.delegate = self
         cell.addGestureRecognizer(gesPan)
+        //点击手势
+        let gesTap = UITapGestureRecognizer(target: self, action: #selector(tap(ges:)))
+        gesPan.delegate = self
+        cell.addGestureRecognizer(gesTap)
+        
+    }
+    
+    @objc private func tap(ges: UIPanGestureRecognizer){
+        
+        for cell in self.cellArray.openArray {
+            self.close(cell: cell)
+        }
         
     }
     
@@ -62,31 +76,50 @@ extension deleteCellHelper : UIGestureRecognizerDelegate{
 //            printLog(message: "\(fabs(translation.x)) ------\(fabs(translation.y))")
             
             /*
-                1.门卫标准：openArray为空 或者 cell属于openArray
+                1.门卫标准：没有当前操作的cell || 当前操作的cell是自己
                 esle
-                    1.openAarray 中的cell关闭
-                    2.终止本次手势
-                    3.return
+             
+                 - 当前操作的cell已经全部打开
+                   1.openAarray 中的cell关闭
+                   2.终止本次手势
+                   3.return
+                 - 当前操作的cell没有全部打开
+                   1.终止本次手势
+                   2.return
+             
+             
             */
-            
-            guard self.cellArray.openArray.count == 0 || self.cellArray.openArray.contains(cell) else {
+            // MARK: 当前cell判断
+            guard self.currentCell == nil || self.currentCell == cell else {
                 
-                for cell in self.cellArray.openArray {
-                    self.close(cell: cell)
+                if self.cellArray.openArray.contains(self.currentCell!) {
+                    for cell in self.cellArray.openArray {
+                        self.close(cell: cell)
+                    }
+                    
+                    //延时1秒执行
+                    ges.isEnabled = false
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1){
+                        ges.isEnabled = true
+                    }
+                    
+                    return
+                }else{
+                    //延时1秒执行
+                    ges.isEnabled = false
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1){
+                        ges.isEnabled = true
+                    }
+                    
+                    return
                 }
-                
-                //延时1秒执行
-                ges.isEnabled = false
-                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1){
-                    ges.isEnabled = true
-                }
-                
-                return
+
             }
             
+            //指定当前操作cell
+            self.currentCell = cell
             
-            
-            
+            // MARK: 位移操作
             if fabs(location.x)<=fabs(location.y) {
                 currentTableView?.isScrollEnabled = true
                 return
@@ -170,8 +203,9 @@ extension deleteCellHelper{
             self.currentTableView?.isScrollEnabled = true
             
             //closeArray 中删除 cell
-            let index = self.cellArray.closeArray.index(of: cell)
-            self.cellArray.closeArray.remove(at: index!)
+            if let index = self.cellArray.closeArray.index(of: cell){
+               self.cellArray.closeArray.remove(at: index)
+            }
             //openArray  中添加 cell
             self.cellArray.openArray.removeAll()
             self.cellArray.openArray.append(cell)
@@ -192,6 +226,8 @@ extension deleteCellHelper{
             if !self.cellArray.closeArray.contains(cell){
                self.cellArray.closeArray.append(cell)
             }
+            //currentCell 为空
+            self.currentCell = nil
             
         }
     }
